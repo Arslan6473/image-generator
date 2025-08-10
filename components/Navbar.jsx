@@ -20,7 +20,7 @@ function Navbar() {
             />
           </svg>
           <h1 className="text-white text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text">
-            AI Image Generator
+            Image Generator Eleven
           </h1>
         </div>
       </div>

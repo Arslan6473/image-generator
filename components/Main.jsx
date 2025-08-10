@@ -7,6 +7,7 @@ function Main() {
   const [imageUrl, setImageUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,23 +104,21 @@ function Main() {
     }
   };
 
-  const handleDownload = () => {
-    if (!imageUrl) return;
+  const handleDownload = (url = imageUrl) => {
+    if (!url) return;
 
     try {
-      if (imageUrl.startsWith("data:")) {
+      if (url.startsWith("data:")) {
         // For base64 images
         const link = document.createElement("a");
-        link.href = imageUrl;
-        link.download = `generated-${prompt
-          .substring(0, 20)
-          .replace(/[^a-zA-Z0-9]/g, "_")}-${Date.now()}.jpg`;
+        link.href = url;
+        link.download = `generated-${Date.now()}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } else {
         // For URL images
-        fetch(imageUrl)
+        fetch(url)
           .then((response) => response.blob())
           .then((blob) => {
             const url = window.URL.createObjectURL(blob);
@@ -158,13 +157,82 @@ function Main() {
     }
   };
 
+  const openPreview = (url) => {
+    setPreviewImage(url);
+  };
+
+  const closePreview = () => {
+    setPreviewImage(null);
+  };
+
   return (
     <div className="h-[calc(100dvh-70px)] bg-gray-950 text-gray-100 p-6 overflow-hidden">
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          {/* Floating Close Button - Top Right */}
+          <button
+            onClick={() => handleDownload(previewImage)}
+            className="absolute top-4 cursor-pointer right-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all hover:scale-105 backdrop-blur-sm"
+            title="Download"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+          </button>
+
+          {/* Floating Download Button - Top Left */}
+          <button
+            onClick={closePreview}
+            className="absolute top-4 left-4 cursor-pointer z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all hover:scale-105 backdrop-blur-sm"
+            title="Close"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {/* Image container */}
+          <div className="w-full h-full flex items-center justify-center">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+
+          {/* Click outside to close */}
+          <div className="absolute inset-0 -z-10" onClick={closePreview} />
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto h-full flex flex-col md:flex-row gap-6">
         {/* Left side - Prompt input */}
         <div className="md:w-1/2 h-full flex flex-col">
           <h1 className="text-2xl font-bold mb-4 text-purple-400">
-            AI Image Generator
+            Generate image you want
           </h1>
           <p className="text-gray-400 mb-6">
             Describe the image you want to generate. Be as descriptive as
@@ -258,13 +326,15 @@ function Main() {
                 </p>
               </div>
             ) : imageUrl ? (
-              <div className="w-full h-full p-4 flex items-center justify-center">
+              <div
+                className="w-full h-full p-4 flex items-center justify-center cursor-zoom-in"
+                onClick={() => openPreview(imageUrl)}
+              >
                 <img
                   src={imageUrl}
                   alt="Generated from prompt"
                   className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                   onError={handleImageError}
-                  onLoad={() => console.log("Image loaded successfully")}
                 />
               </div>
             ) : (
@@ -293,9 +363,8 @@ function Main() {
 
           {imageUrl && !isLoading && (
             <div className="mt-4 flex justify-end items-center">
-          
               <button
-                onClick={handleDownload}
+                onClick={() => handleDownload(imageUrl)}
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-all flex items-center gap-2 text-sm"
               >
                 <svg
