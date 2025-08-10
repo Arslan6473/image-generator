@@ -166,7 +166,7 @@ function Main() {
   };
 
   return (
-    <div className="h-[calc(100dvh-70px)] bg-gray-950 text-gray-100 p-6 overflow-hidden">
+    <div className="h-[calc(100dvh-70px)] bg-gray-950 text-gray-100 p-6 overflow-y-auto">
       {/* Image Preview Modal */}
       {previewImage && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
@@ -362,7 +362,7 @@ function Main() {
           </div>
 
           {imageUrl && !isLoading && (
-            <div className="mt-4 flex justify-end items-center">
+            <div className="md:mt-4 my-4 flex justify-end items-center">
               <button
                 onClick={() => handleDownload(imageUrl)}
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-all flex items-center gap-2 text-sm"
